@@ -1,0 +1,19 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.9
+
+  build:
+    commands:
+      - mkdir -p python/lib/python3.9/site-packages
+      - pip install -r app/requirements.txt -t
+        python/lib/python3.9/site-packages/
+      - zip -r layer.zip python
+      - zip function.zip app/lambda_function.py
+
+artifacts:
+  files:
+    - layer.zip
+    - function.zip
