@@ -7,11 +7,16 @@ phases:
 
   build:
     commands:
+      - echo "Creating Lambda Layer..."
       - mkdir -p python/lib/python3.9/site-packages
-      - pip install -r app/requirements.txt -t
-        python/lib/python3.9/site-packages/
+      - pip install -r app/requirements.txt -t python/lib/python3.9/site-packages/
       - zip -r layer.zip python
+
+      - echo "Creating Lambda Function..."
       - zip function.zip app/lambda_function.py
+
+      - aws s3 cp layer.zip s3://yashasvi-lambda-cicd-artifacts-20260716/layer.zip
+      - aws s3 cp function.zip s3://yashasvi-lambda-cicd-artifacts-20260716/function.zip
 
 artifacts:
   files:

@@ -4,7 +4,7 @@ provider "aws" {
 
 # 1. S3 Bucket
 resource "aws_s3_bucket" "artifact_bucket" {
-  bucket = "my-cicd-artifact-bucket-123456"
+  bucket = "yashasvi-lambda-cicd-artifacts-20260716"
 }
 
 # 2. IAM Role
@@ -14,9 +14,9 @@ resource "aws_iam_role" "codebuild_role" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Effect = "Allow"
+      Effect    = "Allow"
       Principal = { Service = "codebuild.amazonaws.com" }
-      Action = "sts:AssumeRole"
+      Action    = "sts:AssumeRole"
     }]
   })
 }
@@ -27,11 +27,21 @@ resource "aws_iam_role" "codepipeline_role" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Effect = "Allow"
+      Effect    = "Allow"
       Principal = { Service = "codepipeline.amazonaws.com" }
-      Action = "sts:AssumeRole"
+      Action    = "sts:AssumeRole"
     }]
   })
+}
+
+resource "aws_iam_role_policy_attachment" "codebuild_admin" {
+  role       = aws_iam_role.codebuild_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "codepipeline_admin" {
+  role       = aws_iam_role.codepipeline_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
 }
 
 # 3. CodeBuild
@@ -61,7 +71,7 @@ resource "aws_codebuild_project" "build_project" {
 
 resource "aws_codepipeline" "pipeline" {
   name     = "my-pipeline"
-  role_arn = aws_iam_role.codebuild_role.arn
+  role_arn = aws_iam_role.codepipeline_role.arn
 
   artifact_store {
     location = aws_s3_bucket.artifact_bucket.bucket
@@ -77,7 +87,7 @@ resource "aws_codepipeline" "pipeline" {
       owner            = "ThirdParty"
       provider         = "GitHub"
       output_artifacts = ["source_output"]
-      version = "1"
+      version          = "1"
 
       configuration = {
         Owner      = "Yashasvi-SJ"
@@ -97,7 +107,7 @@ resource "aws_codepipeline" "pipeline" {
       owner           = "AWS"
       provider        = "CodeBuild"
       input_artifacts = ["source_output"]
-      version = "1"
+      version         = "1"
 
       configuration = {
         ProjectName = aws_codebuild_project.build_project.name
